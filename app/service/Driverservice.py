@@ -29,7 +29,7 @@ class Driverservice:
         options.add_argument("--headless")
         options.add_argument("--disable-blink-features=AutomationControlled")
 
-        # path = GeckoDriverManager().install()
-        path = 'C:\\Users\\Administrator\\.wdm\\drivers\\geckodriver\\win64\\v0.34.0\\geckodriver.exe'
+        path = GeckoDriverManager().install()
+        # path = 'C:\\Users\\Administrator\\.wdm\\drivers\\geckodriver\\win64\\v0.34.0\\geckodriver.exe'
         print(path)
         return webdriver.Firefox(executable_path=path, options=options, firefox_profile=profile)

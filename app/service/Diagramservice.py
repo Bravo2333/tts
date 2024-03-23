@@ -8,7 +8,7 @@ from app.models.Masterinfo import Masterinfo
 
 class Diagramservice():
     def __init__(self):
-        self.engine = create_engine('mysql+mysqlconnector://root:root2333@localhost:3306/spider')
+        self.engine = create_engine('mysql+mysqlconnector://root:root2333@8.130.54.57:3306/spider')
         pass
 
     def get_master_list(self):
@@ -137,17 +137,13 @@ class Diagramservice():
             onevideoinfo = []
             onevideoinfos = dbsession.query(Videoinfo).filter_by(link=i.link).order_by(desc('updatetime')).all()
             fetchid = []
-            print(len(onevideoinfos)==1)
             for it in onevideoinfos:
                 if it.fatchid not in fetchid:
                     fetchid.append(it.fatchid)
                     onevideoinfo.append(it)
             if len(onevideoinfo) < 2:
-                print(len(onevideoinfo),111)
                 continue
-            print(2222)
             rankvideo['link'] = i.link
-            print(i.link)
             rankvideo['text'] = onevideoinfo[0].text
             rankvideo['one_day_likecount'] = onevideoinfo[0].likecount - onevideoinfo[1].likecount
             rankvideo['one_day_likecount_increasing'] = (onevideoinfo[0].likecount - onevideoinfo[1].likecount) / (

@@ -16,7 +16,7 @@ class Masterservice:
     def __init__(self):
         self.driverservice = Driverservice()
         self.driver = self.driverservice.start_webdriver_with_proxy('8.130.54.57:8112')
-        self.engine = create_engine('mysql+mysqlconnector://root:root2333@localhost:3306/spider')
+        self.engine = create_engine('mysql+mysqlconnector://root:root2333@8.130.54.57:3306/spider')
         pass
 
     def __del__(self):
@@ -98,19 +98,19 @@ class Masterservice:
             dbsession.close()
 
 
-# if __name__ == '__main__':
-#     ms = Masterservice()
-#     Session = sessionmaker(bind=ms.engine)
-#     dbsession = Session()
-#     masters = dbsession.query(Master).filter_by(isactive=1).all()
-#     for i in masters:
-#         print(i.link)
-#         mastersbaseinfo = None
-#         while mastersbaseinfo == None:
-#             try:
-#                 mastersbaseinfo = ms.get_master_baseinfo(i.link)
-#             except:
-#                 mastersbaseinfo = None
-#                 print('获取达人信息失败，重新获取')
-#
-#         ms.addmasterinfo(mastersbaseinfo)
+if __name__ == '__main__':
+    ms = Masterservice()
+    Session = sessionmaker(bind=ms.engine)
+    dbsession = Session()
+    masters = dbsession.query(Master).filter_by(isactive=1).all()
+    for i in masters:
+        print(i.link)
+        mastersbaseinfo = None
+        while mastersbaseinfo == None:
+            try:
+                mastersbaseinfo = ms.get_master_baseinfo(i.link)
+            except:
+                mastersbaseinfo = None
+                print('获取达人信息失败，重新获取')
+
+        ms.addmasterinfo(mastersbaseinfo)

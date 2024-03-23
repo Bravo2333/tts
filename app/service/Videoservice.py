@@ -18,7 +18,7 @@ class Videoservice:
     def __init__(self):
         self.driverservice = Driverservice()
         self.driver = self.driverservice.start_webdriver_with_proxy('8.130.54.57:8112')
-        self.engine = create_engine('mysql+mysqlconnector://root:root2333@localhost:3306/spider')
+        self.engine = create_engine('mysql+mysqlconnector://root:root2333@8.130.54.57:3306/spider')
 
         pass
 
@@ -70,7 +70,7 @@ class Videoservice:
             self.driver.find_element_by_class_name("yjbA3Cby").click()
         except:
             print('此视频没有bgm信息')
-            return None
+            return 'no bgm'
         time.sleep(1)
         html = self.driver.page_source
         # 使用 BeautifulSoup 解析 HTML
@@ -118,6 +118,8 @@ class Videoservice:
         # 常规视频信息抽取
         for i in videolinks:
             info = self.get_video_baseinfo(i, ownerlink)
+            if info=='no bgm':
+                continue
             while info in ['timeout', 'analysis fault',None]:
                 info = self.get_video_baseinfo(i, ownerlink)
             uploadtime = info.uploadtime
@@ -127,6 +129,8 @@ class Videoservice:
         # 置顶视频信息抽取
         for i in top:
             info = self.get_video_baseinfo(i, ownerlink)
+            if info=='no bgm':
+                continue
             while info in ['timeout', 'analysis fault']:
                 info = self.get_video_baseinfo(i, ownerlink)
             uploadtime = info.uploadtime
@@ -228,6 +232,10 @@ class Videoservice:
         videoinfo = []
         for i in newvideo:
             info = self.get_video_baseinfo(i, ownerlink)
+            if info=='no bgm':
+                continue
+            while info in ['timeout', 'analysis fault', None]:
+                info = self.get_video_baseinfo(i, ownerlink)
             videoinfo.append(info)
         # 抽取视频元信息
         for i in videoinfo:
@@ -239,25 +247,29 @@ class Videoservice:
         dbsession.close()
 
 
-# if __name__ == '__main__':
-#     vs = Videoservice()
-#     Session = sessionmaker(bind=vs.engine)
-#     dbsession = Session()
-#     masters = dbsession.query(Master).filter_by(isactive=1).all()
-#     for i in masters:
-#         vs.videoupdate(i.link)
-#     vs.videoexpired()
-#     Session = sessionmaker(bind=vs.engine)
-#     dbsession = Session()
-#     videos = dbsession.query(Video).filter_by(isactivate =1 ).all()
-#     for i in videos:
-#         print(i.ownerlink,i.link)
-#         videobaseinfo = vs.get_video_baseinfo(i.link,i.ownerlink,int(datetime.now().strftime('%Y%m%d')))
-#         while videobaseinfo in ['timeout', 'analysis fault',None]:
-#             videobaseinfo = vs.get_video_baseinfo(i.link,i.ownerlink,int(datetime.now().strftime('%Y%m%d')))
-#         if videobaseinfo=='video has been deleted':
-#             deletedvideo = dbsession.query(Video).filter_by(link = i.link).first()
-#             dbsession.delete(deletedvideo)
-#             continue
-#         vs.addvideoinfo(videobaseinfo)
+if __name__ == '__main__':
+    vs = Videoservice()
+    Session = sessionmaker(bind=vs.engine)
+    dbsession = Session()
+    masters = dbsession.query(Master).filter_by(isactive=1).all()
+    for i in masters:
+        vs.videoupdate(i.link)
+    vs.videoexpired()
+    Session = sessionmaker(bind=vs.engine)
+    dbsession = Session()
+    videos = dbsession.query(Video).filter_by(isactivate =1 ).all()
+    for i in videos:
+        print(i.ownerlink,i.link)
+        videobaseinfo = vs.get_video_baseinfo(i.link,i.ownerlink,int(datetime.now().strftime('%Y%m%d')))
+        # videobaseinfo = vs.get_video_baseinfo(i.link,i.ownerlink,20240315)
+        if videobaseinfo=='no bgm':
+            continue
+        while videobaseinfo in ['timeout', 'analysis fault',None]:
+            videobaseinfo = vs.get_video_baseinfo(i.link,i.ownerlink,int(datetime.now().strftime('%Y%m%d')))
+            # videobaseinfo = vs.get_video_baseinfo(i.link,i.ownerlink,20240315)
+        if videobaseinfo=='video has been deleted':
+            deletedvideo = dbsession.query(Video).filter_by(link = i.link).first()
+            dbsession.delete(deletedvideo)
+            continue
+        vs.addvideoinfo(videobaseinfo)
 
